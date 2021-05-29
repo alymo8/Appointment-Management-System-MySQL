@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseEntered="#initScreenElements" prefHeight="650.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="newApppointment.AppointmentView">
+   <children>
+      <Pane prefHeight="122.0" prefWidth="500.0" style="-fx-background-color: greenyellow;">
+         <children>
+            <Text layoutX="162.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Manage Appointments" wrappingWidth="197.33673095703125">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Text>
+            <Hyperlink layoutX="409.0" layoutY="14.0" onAction="#goToLogin" style="-fx-border-color: transparent;" text="Login Scene" />
+         </children>
+      </Pane>
+      <TextField fx:id="time" layoutX="279.0" layoutY="572.0" prefHeight="25.0" prefWidth="106.0" promptText="time" />
+      <DatePicker fx:id="date" layoutX="279.0" layoutY="531.0" prefHeight="25.0" prefWidth="106.0" promptText="date" />
+      <ComboBox fx:id="service" layoutX="112.0" layoutY="531.0" prefHeight="25.0" prefWidth="148.0" promptText="service" style="-fx-background-color: greenyellow;" />
+      <Button layoutX="305.0" layoutY="611.0" mnemonicParsing="false" onAction="#bookAppointment" prefHeight="25.0" prefWidth="76.0" style="-fx-background-color: greenyellow;" text="Book" />
+      <Text layoutX="193.0" layoutY="502.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Book/Cancel appointment">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Text>
+      <Button layoutX="286.0" layoutY="426.0" mnemonicParsing="false" onAction="#cancelAppointment" prefHeight="25.0" prefWidth="184.0" style="-fx-background-color: greenyellow;" text="Cancel Selected Appointment" />
+      <TableView fx:id="table" layoutX="30.0" layoutY="214.0" prefHeight="200.0" prefWidth="440.0">
+        <columns>
+          <TableColumn fx:id="name_col" prefWidth="120.5999755859375" text="Name" />
+          <TableColumn fx:id="date_col" prefWidth="102.4000244140625" text="Date" />
+            <TableColumn fx:id="time_col" prefWidth="111.0" text="Time" />
+            <TableColumn fx:id="service_col" prefWidth="107.0" text="Service" />
+        </columns>
+      </TableView>
+      <Text layoutX="167.0" layoutY="158.0" strokeType="OUTSIDE" strokeWidth="0.0" text="View Your Appointments">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Text>
+      <ComboBox fx:id="viewAppointments" layoutX="175.0" layoutY="176.0" onAction="#showAppointments" prefHeight="25.0" prefWidth="148.0" promptText="View Appointments" style="-fx-background-color: greenyellow;" />
+   </children>
+</Pane>
