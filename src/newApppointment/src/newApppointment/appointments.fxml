@@ -23,11 +23,11 @@
             <Hyperlink layoutX="409.0" layoutY="14.0" onAction="#goToLogin" style="-fx-border-color: transparent;" text="Login Scene" />
          </children>
       </Pane>
-      <TextField fx:id="time" layoutX="279.0" layoutY="572.0" prefHeight="25.0" prefWidth="106.0" promptText="time" />
+      <TextField fx:id="time" layoutX="279.0" layoutY="572.0" prefHeight="25.0" prefWidth="106.0" promptText="time - ex: 13:00" />
       <DatePicker fx:id="date" layoutX="279.0" layoutY="531.0" prefHeight="25.0" prefWidth="106.0" promptText="date" />
       <ComboBox fx:id="service" layoutX="112.0" layoutY="531.0" prefHeight="25.0" prefWidth="148.0" promptText="service" style="-fx-background-color: greenyellow;" />
       <Button layoutX="305.0" layoutY="611.0" mnemonicParsing="false" onAction="#bookAppointment" prefHeight="25.0" prefWidth="76.0" style="-fx-background-color: greenyellow;" text="Book" />
-      <Text layoutX="193.0" layoutY="502.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Book/Cancel appointment">
+      <Text layoutX="198.0" layoutY="501.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Book appointment">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>

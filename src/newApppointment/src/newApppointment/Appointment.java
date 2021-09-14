@@ -9,8 +9,8 @@ import java.sql.Statement;
 public abstract class Appointment {
 
 	String DB_URL = "jdbc:mysql://localhost:3306/appointments";
-	String USER = "guest";
-	String PASS = "guest";
+	String USER = "aly";
+	String PASS = "aly";
 
 	String name;
 	String service;

@@ -39,8 +39,8 @@ import javafx.stage.Stage;
 public class AppointmentView extends Application{
 
 	static final String DB_URL = "jdbc:mysql://localhost:3306/";
-	static final String USER = "guest";
-	static final String PASS = "guest";
+	static final String USER = "aly";
+	static final String PASS = "aly";
 
 
 	Stage window;
@@ -138,26 +138,40 @@ public class AppointmentView extends Application{
 		java.sql.Statement get = conn.createStatement();
 
 		Product product = table.getSelectionModel().getSelectedItem();
-		
+
 		ResultSet myRs = get.executeQuery("select * from appointments.appointments_list"
 				+ " where userId = '" + product.getName()
-				+ "' and time = '" + product.getTime() + "' and date = '"+ product.getDate() + "' ;");
+				+ "' and time = '" + product.getTime() + "' and date = '"+ product.getDate() + "' and status = 'true' ;");
 
 		while(myRs.next()) {
-			text+= (myRs.getString("userid") + " " + myRs.getString("time") + " " + myRs.getString("date") + " " + myRs.getString("service")+ " ");
+			text+= (myRs.getString("userid") + "," + myRs.getString("time") + "," + myRs.getString("date") + "," + myRs.getString("service")+ "," + myRs.getString("type"));
 		}
 
-		String[] fields = text.split(" ");
+		String[] fields = text.split(",");
 
 		String command = "update appointments.appointments_list "
 				+ " set Status='false'"
 				+ " where time = '" + fields[1] + "' and date = '" + fields[2] + "' and userId = '" + fields[0] + "' ;";
-		System.out.println(command);
+		
+		if(fields[4].contains("Running")) {
+			System.out.println(command);
+			java.sql.Statement update = conn.createStatement();
+			update.execute(command);
 
+			Appointment running = new AppointmentRunning(fields[0], fields[3], true, getSyst(), fields[2], fields[1]);
+			running.saveToDataBase(running);
+			popupConfirm("The appointment has ended");
+		}
+		
+		else {
+			popupError("This appointment is not running, so it cannot be ended");
+		}
+		
+		
 		java.sql.Statement update = conn.createStatement();
 		update.execute(command);
 
-		Appointment end = new AppointmentDone(fields[0], fields[3] + fields[4], true, getSyst(), fields[2], fields[1]);
+		Appointment end = new AppointmentDone(fields[0], fields[3], true, getSyst(), fields[2], fields[1]);
 		end.saveToDataBase(end);
 
 		}
@@ -181,27 +195,37 @@ public class AppointmentView extends Application{
 		java.sql.Statement get = conn.createStatement();
 
 		Product product = table.getSelectionModel().getSelectedItem();
-		
+
 		ResultSet myRs = get.executeQuery("select * from appointments.appointments_list"
 				+ " where userId = '" + product.getName()
-				+ "' and time = '" + product.getTime() + "' and date = '"+ product.getDate() + "' ;");
+				+ "' and time = '" + product.getTime() + "' and date = '"+ product.getDate() + "' and status = 'true' ;");
 
 		while(myRs.next()) {
-			text+= (myRs.getString("userid") + " " + myRs.getString("time") + " " + myRs.getString("date") + " " + myRs.getString("service")+ " ");
+			text+= (myRs.getString("userid") + "," + myRs.getString("time") + "," + myRs.getString("date") + "," + myRs.getString("service")+ "," + myRs.getString("type"));
 		}
 
-		String[] fields = text.split(" ");
+		String[] fields = text.split(",");
 
 		String command = "update appointments.appointments_list "
 				+ " set Status='false'"
-				+ " where time = '" + fields[1] + "' and date = '" + fields[2] + "' and userId = '" + fields[0] + "' ;";
-		System.out.println(command);
-		java.sql.Statement update = conn.createStatement();
-		update.execute(command);
+				+ " where time = '" + fields[1] + "' and date = '" + fields[2] + "' and userId = '" + fields[0] + "' and type = 'AppointmentBooked';";
 
-		Appointment running = new AppointmentRunning(fields[0], fields[3] + fields[4], true, getSyst(), fields[2], fields[1]);
-		running.saveToDataBase(running);
+		String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+		if(fields[4].contains("Booked") && timeStamp.compareTo(fields[2])==0) {
+			System.out.println(command);
+			java.sql.Statement update = conn.createStatement();
+			update.execute(command);
 
+			Appointment running = new AppointmentRunning(fields[0], fields[3], true, getSyst(), fields[2], fields[1]);
+			running.saveToDataBase(running);
+			popupConfirm("The appointment has started");
+		}
+		else if(fields[4].contains("Booked") && timeStamp.compareTo(fields[2])!=0){
+			popupError("This is not the date of the appointment");
+		}
+		else {
+			popupError("This appointment is not booked, so it cannot be started");
+		}
 		}
 		catch(SQLException e) {
 			e.printStackTrace();
@@ -217,10 +241,16 @@ public class AppointmentView extends Application{
 	@FXML
 	void bookAppointment(ActionEvent event) {
 		String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());    	
-		if(date.getValue().toString().compareTo(timeStamp) < 0) popupError("The date is invalid");
-		
+		if(date.getValue().toString().compareTo(timeStamp) < 0) {
+			popupError("The date is invalid");
+			return;
+
+		}
+
 		Appointment a = new AppointmentBooked(Appointment.getCurrentUser().getUsername(), service.getValue().toString(), true, getSyst(), date.getValue().toString(), time.getText());
 		a.createAppointment();
+
+		popupConfirm("The appointment was booked");
 	}
 
 	@FXML
@@ -231,34 +261,42 @@ public class AppointmentView extends Application{
 		java.sql.Statement get = conn.createStatement();
 
 		Product product = table.getSelectionModel().getSelectedItem();
-		
+		if(product == null || product.getDate()==null) popupError("No appointment was selected");
+
 		ResultSet myRs = get.executeQuery("select * from appointments.appointments_list"
 				+ " where userId = '" + Appointment.getCurrentUser().getUsername()
-				+ "' and time = '" + product.getTime() + "' and date = '"+ product.getDate() + "' ;");
+				+ "' and time = '" + product.getTime() + "' and date = '"+ product.getDate() + "' and status = 'true' and type = 'AppointmentBooked';");
 
 		while(myRs.next()) {
-			text+= (myRs.getString("userid") + " " + myRs.getString("time") + " " + myRs.getString("date") + " " + myRs.getString("service")+ " ");
+			text+= (myRs.getString("userid") + "," + myRs.getString("time") + "," + myRs.getString("date") + "," + myRs.getString("type")+ "," + myRs.getString("service"));
 		}
 
-		String[] fields = text.split(" ");
+		String[] fields = text.split(",");
 
 		String command = "update appointments.appointments_list "
 				+ " set Status='false'"
 				+ " where time = '" + fields[1] + "' and date = '" + fields[2] + "' and userId = '" + fields[0] + "' ;";
 
-		java.sql.Statement update = conn.createStatement();
-		update.execute(command);
-		System.out.println(command);
+		String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());    	
 
-		Appointment canceled = new AppointmentCanceled(fields[0], fields[3] + " " + fields[4], true, getSyst(), fields[2], fields[1]);
-		canceled.saveToDataBase(canceled);
+		if(fields[3].contains("Booked") && fields[2].compareTo(timeStamp)>0) {
+			java.sql.Statement update = conn.createStatement();
+			update.execute(command);
 
+			Appointment canceled = new AppointmentCanceled(fields[0], fields[4], true, getSyst(), fields[2], fields[1]);
+			canceled.saveToDataBase(canceled);
+			popupConfirm("Appointment canceled succesfuly");
 		}
-		catch(SQLException e) {
-			e.printStackTrace();
+		else if(fields[3].contains("Booked") && fields[2].compareTo(timeStamp)==0) {
+			popupError("Appointment cannot be canceled on the same day");
+		}
+		else {
+			popupError("This appointment is not booked, so it cannot be canceled");
+		}
+		System.out.println(command);
 		}
 		catch(Exception e) {
-			popupError(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -369,17 +407,17 @@ public class AppointmentView extends Application{
 	void doSignUp(ActionEvent event) throws SQLException {
 		try{
 			Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);			
-			
+
 			java.sql.Statement insert = conn.createStatement();
 			System.out.println("insert into appointments.user"
 					+ " values '" + username.getText() + "', '" + password.getText() +  "' ;");
-			
+
 			String command ="insert into appointments.user (username,password)"
 					+ " values ('" + username.getText() + "', '" 
 					+ password.getText() +  "') ;";
-			
+
 			insert.execute(command);
-			
+
 		}catch(SQLException e) {
 			System.out.println(e.getMessage());
 			popupError("This username already exists");
@@ -387,10 +425,17 @@ public class AppointmentView extends Application{
 
 	}
 
-	
+
 
 	public void popupError(String text) {
 		Alert box = new Alert(AlertType.ERROR);
+		box.setHeaderText(null);
+		box.setContentText(text);
+		box.show();
+	}
+
+	public void popupConfirm(String text) {
+		Alert box = new Alert(AlertType.CONFIRMATION);
 		box.setHeaderText(null);
 		box.setContentText(text);
 		box.show();
@@ -414,12 +459,12 @@ public class AppointmentView extends Application{
 						+ " where username = '" + username.getText() + "' and password = '" + password.getText() + "' ;");
 				String text = "";
 				while(myRs.next()) text += myRs.getString("username");
-				
+
 				if(text.equals("")) {
 					popupError("Wrong username/password");
 					return;
 				}
-				
+
 				Appointment.setCurrentUser(new User(username.getText(), password.getText()));
 
 				switchScene(new File("src/newApppointment/appointments.fxml"), (Stage) ((Node) event.getSource()).getScene().getWindow());
